@@ -51,11 +51,17 @@ filtro_segmento = st.sidebar.multiselect(
     options=final.segmento.unique(),
     default=final.segmento.unique()
 )
-
+# ==== PUNTO 5 ====
+final_preferencia = st.sidebar.multiselect(
+    label= "PREFERENCIA DECLARADA",
+    options= final.preferencia_declarada.unique(),
+    default= final.preferencia_declarada.unique()
+)
 final_FILTRADO = final[
     (final.canal_adquisicion.isin(filtro_canal)) &
     (final.ciudad.isin(filtro_ciudad)) &
-    (final.segmento.isin(filtro_segmento))
+    (final.segmento.isin(filtro_segmento)) & 
+    (final.preferencia_declarada.isin(final_preferencia))
 ]
 
 numero_compradores = final_FILTRADO.query("n_pedidos > 0").shape[0]
