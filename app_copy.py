@@ -92,7 +92,16 @@ with derecha:
                   orientation="h")
     fig2.update_layout(xaxis_title="Ingreso", yaxis_title="Departamento")
     st.plotly_chart(fig2)
-
+# ===== PUNTO 2 =====
+st.divider()
+metrica1, metrica2 = st.columns(2)
+compradores1 = final_FILTRADO.query("n_pedidos == 1").shape[0]
+if numero_compradores != 0:
+    porcentaje_respecto_al_total = compradores1 / numero_compradores
+else:
+    porcentaje_respecto_al_total = 0
+metrica1.metric(label="Compradores unica vez",value=compradores1,border=True)
+metrica2.metric(label="Porcentaje Compradores unica vez",value=f"{porcentaje_respecto_al_total:.2%}",border=True)
 # ===== PUNTO 3 =====
 st.divider()
 st.header("Campaña de recompra por canal")
