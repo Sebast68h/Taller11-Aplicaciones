@@ -67,7 +67,10 @@ final_FILTRADO = final[
 numero_compradores = final_FILTRADO.query("n_pedidos > 0").shape[0]
 npedidos = final_FILTRADO.n_pedidos.sum()
 ingreso = final_FILTRADO.ingreso_total.sum()
-recompra = final_FILTRADO.query("n_pedidos > 1").shape[0] / numero_compradores if numero_compradores > 0 else 0
+if numero_compradores > 0:
+    recompra = final_FILTRADO.query("n_pedidos > 1").shape[0] / numero_compradores
+else:
+    recompra = 0
 
 col1, col2, col3, col4 = st.columns(4)
 col1.metric(label="COMPRADORES", value=numero_compradores, border=True)
@@ -80,8 +83,9 @@ st.divider()
 izquierda, derecha = st.columns(2)
 
 with izquierda:
-    df_plot = (final_FILTRADO.groupby("segmento", as_index=False)
-               .agg(n_clientes=("id_cliente", "count")))
+    df_plot = final_FILTRADO.groupby("segmento", as_index=False).agg(
+        n_clientes=("id_cliente", "count")
+    )
     fig = pe.bar(data_frame=df_plot, x="segmento", y="n_clientes",
                  color="segmento", text="n_clientes")
     fig.update_layout(xaxis_title="Segmento", yaxis_title="Número de Clientes",
@@ -89,9 +93,10 @@ with izquierda:
     st.plotly_chart(fig)
 
 with derecha:
-    df_plot2 = (final_FILTRADO.groupby("preferencia_declarada", as_index=False)
-                .agg(ingreso=("ingreso_total", "sum"))
-                .sort_values("ingreso", ascending=False))
+    df_plot2 = final_FILTRADO.groupby("preferencia_declarada", as_index=False).agg(
+        ingreso=("ingreso_total", "sum")
+    )
+    df_plot2 = df_plot2.sort_values("ingreso", ascending=False)
     fig2 = pe.bar(data_frame=df_plot2, x="ingreso", y="preferencia_declarada",
                   orientation="h")
     fig2.update_layout(xaxis_title="Ingreso", yaxis_title="Departamento")
@@ -133,10 +138,12 @@ if compradores_sel.shape[0] > 0:
     compradores_sel["recompra"] = compradores_sel["n_pedidos"] >= 2
 
     with lab_izq:
-        por_canal = (compradores_sel.groupby("canal_adquisicion", as_index=False)
-                     .agg(compradores=("id_cliente", "count"),
-                          recompradores=("recompra", "sum")))
-        por_canal["tasa_recompra"] = round(por_canal["recompradores"] / por_canal["compradores"] * 100, 1)
+        por_canal = compradores_sel.groupby("canal_adquisicion", as_index=False).agg(
+            compradores=("id_cliente", "count"),
+            recompradores=("recompra", "sum")
+        )
+        tasa = por_canal["recompradores"] / por_canal["compradores"] * 100
+        por_canal["tasa_recompra"] = tasa.round(1)
         por_canal = por_canal.sort_values("tasa_recompra", ascending=False)
 
         fig_tasa = pe.bar(data_frame=por_canal, x="canal_adquisicion", y="tasa_recompra",
@@ -149,8 +156,9 @@ if compradores_sel.shape[0] > 0:
     compradores_sel["una_compra"] = compradores_sel["n_pedidos"] == 1
 
     with lab_der:
-        df_una = (compradores_sel.groupby("canal_adquisicion", as_index=False)
-                  .agg(una_compra=("una_compra", "sum")))
+        df_una = compradores_sel.groupby("canal_adquisicion", as_index=False).agg(
+            una_compra=("una_compra", "sum")
+        )
         df_una = df_una.sort_values("una_compra", ascending=True)
 
         fig4 = pe.bar(data_frame=df_una, x="una_compra", y="canal_adquisicion",
