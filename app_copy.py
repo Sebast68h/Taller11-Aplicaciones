@@ -51,7 +51,7 @@ filtro_segmento = st.sidebar.multiselect(
     options=final.segmento.unique(),
     default=final.segmento.unique()
 )
-# ==== PUNTO 5 ====
+#punto 5 filtro
 final_preferencia = st.sidebar.multiselect(
     label= "PREFERENCIA DECLARADA",
     options= final.preferencia_declarada.unique(),
@@ -77,8 +77,6 @@ col4.metric(label="RECOMPRA", value=f"{recompra:.2%}", border=True)
 
 st.divider()
 
-st.divider()
-
 izquierda, derecha = st.columns(2)
 
 with izquierda:
@@ -98,7 +96,7 @@ with derecha:
                   orientation="h")
     fig2.update_layout(xaxis_title="Ingreso", yaxis_title="Departamento")
     st.plotly_chart(fig2)
-# ===== PUNTO 2 =====
+#punto 2
 st.divider()
 metrica1, metrica2 = st.columns(2)
 compradores1 = final_FILTRADO.query("n_pedidos == 1").shape[0]
@@ -108,7 +106,23 @@ else:
     porcentaje_respecto_al_total = 0
 metrica1.metric(label="Compradores unica vez",value=compradores1,border=True)
 metrica2.metric(label="Porcentaje Compradores unica vez",value=f"{porcentaje_respecto_al_total:.2%}",border=True)
-# ===== PUNTO 3 =====
+
+st.write("""Punto 1. La tasa de recompra la sacamos dividiendo los clientes que compraron
+dos veces o más entre todos los que compraron al menos una vez. Los clientes con una sola compra
+son los que compraron una vez y no volvieron, o sea, la gente a la que le apuntaría la campaña.
+Solo con la tasa no alcanza para decidir, porque un porcentaje no dice cuántas personas hay detrás.
+Un canal puede tener la tasa más baja pero tener poca gente, y otro puede tener mejor tasa pero
+muchos más clientes que solo compraron una vez.""")
+
+#punto 5
+st.write("""Punto 5. Probamos los filtros con varias opciones. Con todo seleccionado salen
+poco más de mil compradores y alrededor del 33,91% compro una sola vez. Cuando dejamos solo
+la preferencia Hogar con los canales Referidos y Orgánico, los números bajan bastante, pero las
+tarjetas y las gráficas se siguen actualizando bien. Y si dejamos solo el segmento Sin Compra,
+no queda ningún comprador, las tarjetas quedan en cero y en lugar de las gráficas sale el mensaje
+de que no hay compradores.""")
+
+#PUNTO 3
 st.divider()
 st.header("Campaña de recompra por canal")
 
@@ -127,11 +141,11 @@ if compradores_sel.shape[0] > 0:
 
         fig_tasa = pe.bar(data_frame=por_canal, x="canal_adquisicion", y="tasa_recompra",
                           text="tasa_recompra", hover_data=["compradores"])
-        fig_tasa.update_layout(xaxis_title="Canal", yaxis_title="% con 2 o más pedidos",
+        fig_tasa.update_layout(xaxis_title="Canal", yaxis_title="porcentaje con 2 o más pedidos",
                                title="Tasa de recompra por canal")
         st.plotly_chart(fig_tasa)
 
-    # ===== PUNTO 4 =====
+    #punto 4
     compradores_sel["una_compra"] = compradores_sel["n_pedidos"] == 1
 
     with lab_der:
@@ -145,15 +159,22 @@ if compradores_sel.shape[0] > 0:
                            title="Clientes con exactamente un pedido por canal")
         st.plotly_chart(fig4)
 
-    st.write("""Punto 3: Usamos un gráfico de barras porque solo comparamos un dato,
+    st.write("""Punto 3. Usamos un gráfico de barras porque solo comparamos un dato,
     el porcentaje de recompra, entre cuatro canales. Con barras se ve rápido qué canal tiene
     la tasa más alta y cuál la más baja, y las ordenamos de mayor a menor. Al pasar el mouse
     sobre cada barra aparece cuántos compradores tiene ese canal.""")
 
-    st.write("""**Punto 4.** No siempre. Que un canal tenga muchos clientes de una sola compra
-    puede ser solo porque es un canal grande, con mucha gente. La tasa, en cambio, es un
-    porcentaje y no depende de cuántos clientes tenga el canal. En nuestros datos sí coinciden:
-    Redes sociales tiene más clientes de una compra 147 y la tasa más baja 59,6 %, pero
-    también es el canal con más compradores 364.""")
+    st.write("""Punto 4. No siempre. Si un canal tiene muchos clientes de una sola compra
+    puede ser solo porque es un canal grande, con mucha gente. La tasa en cambio, es un
+    porcentaje y no depende de cuántos clientes tenga el canal. En nuestros datos sí coinciden
+    en Redes sociales, pero también es el canal que más compradores tiene""")
 else:
-    st.write("No hay compradores con los filtros seleccionados.") 
+    st.write("No hay compradores")
+
+#punto 6
+st.write("""Punto 6: Empezaríamos el piloto en Redes sociales. Es el canal con más
+clientes que solo compraron una vez, con 147, y el que tiene la tasa de recompra más baja el 59,6%, mientras que Orgánico tiene el 75,5 %. Es donde hay más gente para
+convencer y más espacio para mejorar. Hay que tener en cuenta que los clientes que llegaron hace
+poco no han tenido mucho tiempo para volver a comprar, y que los datos no dicen por qué alguien
+no volvió. Para saber si el piloto funcionó, miraríamos cuántos de esos clientes hacen su segunda
+compra en los 60 días siguientes y lo compararíamos con un grupo al que no le llegue la campaña.""")
